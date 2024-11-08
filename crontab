@@ -1,0 +1,5 @@
+#Envío de Emails
+
+*     *       *       *       *       	cd /var/www/cron_laravel && php artisan schedule:run >> /var/www/cron_laravel/storage/logs/crontab.log 2>&1
+#ejecutarlo el domingo a las 3am
+	0 3 * * 1 /usr/bin/supervisorctl start limpieza_docker

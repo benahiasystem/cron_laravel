@@ -1,0 +1,31 @@
+FROM php:8.2-fpm-alpine
+
+ENV TZ=America/Bogota 
+
+# Configuración de zona horaria
+RUN apk add --no-cache tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
+# Instalación de bash, moreutils y supervisor
+RUN apk add --no-cache bash moreutils supervisor
+
+# Instalación de extensiones de PHP
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Agregar archivo crontab
+ADD crontab /etc/crontabs/root
+
+# Agregar configuración de Supervisor
+ADD supervisor.conf /etc/supervisor/conf.d/ 
+
+CMD ["crond", "-f"]
+
+#CMD ["crond", "-f", "/etc/supervisor/conf.d/supervisor.conf"]
+
+#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/laravel-worker.conf"]
+
+#ADD start.sh /var/www/cron_larave/start.sh  
+#RUN chmod +x /var/www/cron_larave/start.sh  
+#CMD ["/var/www/cron_larave/start.sh"]
+

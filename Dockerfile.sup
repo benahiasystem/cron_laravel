@@ -1,0 +1,20 @@
+FROM php:8.2-fpm-alpine
+
+ENV TZ=America/Bogota 
+
+# Configuración de zona horaria
+RUN apk add --no-cache tzdata
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Instalación de bash, moreutils y supervisor
+RUN apk update && apk add --no-cache bash supervisor
+
+RUN mkdir -p "/etc/supervisor/logs"
+
+# Instalación de extensiones de PHP
+RUN docker-php-ext-install pdo pdo_mysql
+
+# Agregar configuración de Supervisor
+COPY supervisor.conf /etc/supervisor/supervisord.conf 
+
+CMD ["supervisord", "-n", "-c",  "/etc/supervisor/supervisord.conf"]

@@ -1,0 +1,72 @@
+version: '3.7'
+services:
+  nginx:
+    container_name: nginx-cron
+    image: nginx:stable-alpine
+    working_dir: /var/www/cron_laravel
+    volumes:
+      - ./cron.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/cron_laravel
+    ports:
+      - "81:81"
+    restart: always
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - default
+
+  php:
+    container_name: php-fpm-cron
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+      args:
+          user: ubuntu
+          uid: 1000
+    working_dir: /var/www/cron_laravel
+    volumes:
+      - ./:/var/www/cron_laravel
+    networks:
+      - default
+
+  mysql:
+    #image: mysql:8.0.37
+    image: mysql:5.7
+    container_name: mysql-cron
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: admin.root
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - default
+
+  cron:
+    container_name: crontab
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    working_dir: /var/www/cron_laravel
+    volumes:
+      - ./:/var/www/cron_laravel
+    networks:
+      - default
+
+  supervisor:
+    container_name: supervisor
+    build:
+      context: .
+      dockerfile: Dockerfile.sup
+    working_dir: /var/www/cron_laravel
+    volumes:
+      - ./:/var/www/cron_laravel
+    networks:
+      - default
+      
+volumes:
+    mysql:
